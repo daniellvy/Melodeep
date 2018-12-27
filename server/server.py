@@ -19,11 +19,13 @@ from magenta.models import melody_rnn
 from magenta.models.melody_rnn import melody_rnn_sequence_generator
 from magenta.protobuf import generator_pb2, music_pb2
 
-from predict import generate_midi, generator
 import os
 from flask import send_file, request
 import pretty_midi
 import sys
+
+from server import models
+
 if sys.version_info.major <= 2:
     from cStringIO import StringIO
 else:
@@ -32,7 +34,7 @@ import time
 import json
 
 from flask import Flask
-app = Flask(__name__, static_url_path='', static_folder=os.path.abspath('../static'))
+app = Flask(__name__, static_url_path='', static_folder=os.path.abspath('../melodeep/dist/'))
 
 twinkle_twinkle = music_pb2.NoteSequence()
 
@@ -55,6 +57,7 @@ twinkle_twinkle.total_time = 8
 
 twinkle_twinkle.tempos.add(qpm=60);
 
+
 @app.route('/predict', methods=['POST'])
 def predict():
     now = time.time()
@@ -65,14 +68,20 @@ def predict():
     return send_file(ret_midi, attachment_filename='return.mid', 
         mimetype='audio/midi', as_attachment=True)
 
+
 @app.route('/generate-melody', methods=['POST'])
 def generate():
     now = time.time()
     values = json.loads(request.data)
-    print(values)
     midi_data = pretty_midi.PrettyMIDI(StringIO(''.join(chr(v) for v in values)))
     print(midi_data)
-    ret_midi = generate_midi(midi_data, 10);
+
+    midi_data = pretty_midi.PrettyMIDI('example.mid')
+    primer_sequence = magenta.music.midi_io.midi_to_sequence_proto(midi_data)
+    num_steps = 20  # change this for shorter or longer sequences
+    temperature = 1.0  # the higher the temperature the more random the sequence.
+
+    ret_midi = models.generate(midi_data, 10)
     print(ret_midi)
 
     return send_file(ret_midi, attachment_filename='return.mid',
@@ -80,43 +89,10 @@ def generate():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return send_file('../melodeep/dist/melodeep/index.html')
+    return send_file('melodeep/index.html')
 
 
 if __name__ == '__main__':
 
-    bundle = mm.sequence_generator_bundle.read_bundle_file('basic_rnn.mag')
-    generator_map = melody_rnn_sequence_generator.get_generator_map()
-    melody_rnn = generator_map['basic_rnn'](checkpoint=None, bundle=bundle)
-    melody_rnn.initialize()
-
-
-    midi_data = pretty_midi.PrettyMIDI('example.mid')
-    primer_sequence = magenta.music.midi_io.midi_to_sequence_proto(midi_data)
-    print(primer_sequence)
-
-    input_sequence = twinkle_twinkle  # change this to teapot if you want
-    num_steps = 128  # change this for shorter or longer sequences
-    temperature = 1.0  # the higher the temperature the more random the sequence.
-
-    # Set the start time to begin on the next step after the last note ends.
-    last_end_time = (max(n.end_time for n in input_sequence.notes)
-                     if input_sequence.notes else 0)
-    qpm = input_sequence.tempos[0].qpm
-    seconds_per_step = 60.0 / qpm / melody_rnn.steps_per_quarter
-    total_seconds = num_steps * seconds_per_step
-
-    print(total_seconds)
-
-    generator_options = generator_pb2.GeneratorOptions()
-    generator_options.args['temperature'].float_value = temperature
-    generate_section = generator_options.generate_sections.add(
-        start_time=last_end_time + seconds_per_step,
-        end_time=total_seconds)
-
-    # Ask the model to continue the sequence.
-    sequence = melody_rnn.generate(input_sequence, generator_options)
-
-    print(sequence)
-
-    #app.run(host='127.0.0.1', port=8080)
+    models.initialize()
+    app.run(host='127.0.0.1', port=8080)

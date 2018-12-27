@@ -18,38 +18,19 @@
 import magenta
 import magenta.music as mm
 
-from magenta.models.melody_rnn import melody_rnn_config_flags
-from magenta.models.melody_rnn import melody_rnn_model
 from magenta.models.melody_rnn import melody_rnn_sequence_generator
 from magenta.protobuf import generator_pb2
-from magenta.protobuf import music_pb2
 
 basic_rnn = None
 lookback_rnn = None
 attention_rnn = None
 
 
-def initialize():
-    bundle = mm.sequence_generator_bundle.read_bundle_file('basic_rnn.mag')
+def generate(midi_data, primer_sequence, num_steps=20, temperature=1.0, model='basic_rnn'):
+    bundle = mm.sequence_generator_bundle.read_bundle_file(model + '.mag')
     generator_map = melody_rnn_sequence_generator.get_generator_map()
-    basic_rnn = generator_map['basic_rnn'](checkpoint=None, bundle=bundle)
-    basic_rnn.initialize()
-
-    bundle = mm.sequence_generator_bundle.read_bundle_file('lookback_rnn.mag')
-    generator_map = melody_rnn_sequence_generator.get_generator_map()
-    lookback_rnn = generator_map['lookback_rnn'](checkpoint=None, bundle=bundle)
-    lookback_rnn.initialize()
-
-    bundle = mm.sequence_generator_bundle.read_bundle_file('attention_rnn.mag')
-    generator_map = melody_rnn_sequence_generator.get_generator_map()
-    attention_rnn = generator_map['attention_rnn'](checkpoint=None, bundle=bundle)
-    attention_rnn.initialize()
-
-
-def generate(primer_sequence, num_steps=20, temperature=1.0, model='basic_rnn'):
-    melody_rnn = basic_rnn
-    if model == "basic_rnn":
-        melody_rnn = basic_rnn
+    melody_rnn = generator_map[model](checkpoint=None, bundle=bundle)
+    melody_rnn.initialize()
 
     # Set the start time to begin on the next step after the last note ends.
     last_end_time = (max(n.end_time for n in primer_sequence.notes)

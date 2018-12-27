@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpRequest, HttpEventType, HttpResponse } from '@angular/common/http';
 import {catchError, map} from 'rxjs/operators';
-import { of } from "rxjs/internal/observable/of";
+import { of } from 'rxjs/internal/observable/of';
 import {Observable} from 'rxjs';
 
 @Injectable({

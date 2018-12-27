@@ -6,7 +6,8 @@
       <input type="file" class="form-control-file" (change)="onFileChange($event)"/>
 
 
-    <button mat-button type="submit" [disabled]="formGroup.invalid || formGroup.prestine">Submit
+    <button mat-button type="submit" >Submit
+    <!--<button mat-button type="submit" [disabled]="formGroup.invalid || formGroup.prestine">Submit-->
       <i class="fa fa-spinner fa-spin fa-fw" *ngIf="loading"></i>
     </button>
 

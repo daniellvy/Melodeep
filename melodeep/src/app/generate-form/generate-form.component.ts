@@ -13,6 +13,7 @@ export class GenerateFormComponent implements OnInit {
   formGroup = this.fb.group({
     file: [null, Validators.required]
   });
+  private file: any;
 
   constructor(private fb: FormBuilder, private cd: ChangeDetectorRef,
               private uploadService: UploadService) {}
@@ -21,27 +22,18 @@ export class GenerateFormComponent implements OnInit {
   }
 
   onFileChange(event) {
-    const reader = new FileReader();
-
     if (event.target.files && event.target.files.length) {
       const [file] = event.target.files;
-      reader.readAsDataURL(file);
-
-      reader.onload = () => {
-        this.formGroup.patchValue({
-          file: reader.result
-        });
-
-        // need to run CD since file load runs outside of zone
-        this.cd.markForCheck();
-      };
+      this.file = file;
     }
   }
 
   onSubmit() {
-    const formModel = this.formGroup.value;
+    let formData = new FormData();
+    formData.append('file', this.file);
+
     this.loading = true;
-    this.uploadService.generate(formModel)
+    this.uploadService.generate(formData)
       .subscribe(message => alert(message));
   }
 

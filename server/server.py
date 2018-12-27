@@ -13,18 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import base64
+import codecs
+import tempfile
+import uuid
+
 import magenta.music as mm
 import magenta
-from magenta.models import melody_rnn
-from magenta.models.melody_rnn import melody_rnn_sequence_generator
-from magenta.protobuf import generator_pb2, music_pb2
+import parser
+from IPython.utils.tests.test_wildcard import q
+from magenta.protobuf import music_pb2
 
 import os
-from flask import send_file, request
+from flask import send_file, request, flash, jsonify
 import pretty_midi
 import sys
 
-from server import models
+import models
 
 if sys.version_info.major <= 2:
     from cStringIO import StringIO
@@ -34,7 +39,12 @@ import time
 import json
 
 from flask import Flask
+
 app = Flask(__name__, static_url_path='', static_folder=os.path.abspath('../melodeep/dist/'))
+
+ALLOWED_EXTENSIONS = set(['mid', 'midi'])
+UPLOAD_FOLDER = 'uploaded'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 twinkle_twinkle = music_pb2.NoteSequence()
 
@@ -57,35 +67,45 @@ twinkle_twinkle.total_time = 8
 
 twinkle_twinkle.tempos.add(qpm=60);
 
-
-@app.route('/predict', methods=['POST'])
-def predict():
-    now = time.time()
-    values = json.loads(request.data)
-    midi_data = pretty_midi.PrettyMIDI(StringIO(''.join(chr(v) for v in values)))
-    duration = float(request.args.get('duration'))
-    ret_midi = generate_midi(midi_data, duration)
-    return send_file(ret_midi, attachment_filename='return.mid', 
-        mimetype='audio/midi', as_attachment=True)
+#
+# @app.route('/predict', methods=['POST'])
+# def predict():
+#     now = time.time()
+#     values = json.loads(request.data)
+#     midi_data = pretty_midi.PrettyMIDI(StringIO(''.join(chr(v) for v in values)))
+#     duration = float(request.args.get('duration'))
+#     ret_midi = generate_midi(midi_data, duration)
+#     return send_file(ret_midi, attachment_filename='return.mid',
+#         mimetype='audio/midi', as_attachment=True)
 
 
 @app.route('/generate-melody', methods=['POST'])
 def generate():
     now = time.time()
-    values = json.loads(request.data)
-    midi_data = pretty_midi.PrettyMIDI(StringIO(''.join(chr(v) for v in values)))
-    print(midi_data)
 
-    midi_data = pretty_midi.PrettyMIDI('example.mid')
+    midifile = request.files['file']
+    if not (midifile.filename.endswith(".mid") or midifile.filename.endswith(".midi")):
+        response = jsonify({"message": "Bad file format, please upload mid / midi"})
+        response.status_code = 500
+        return response
+
+    filename = "uploaded/" + str(uuid.uuid4()) + ".mid"
+    midifile.save(filename)
+
+    midi_data = pretty_midi.PrettyMIDI(filename)
     primer_sequence = magenta.music.midi_io.midi_to_sequence_proto(midi_data)
     num_steps = 20  # change this for shorter or longer sequences
     temperature = 1.0  # the higher the temperature the more random the sequence.
+    submodel = "basic_rnn"
 
-    ret_midi = models.generate(midi_data, 10)
-    print(ret_midi)
+    generated_sequence = models.generate(midi_data, primer_sequence, num_steps, temperature, submodel)
+    print(generated_sequence)
 
-    return send_file(ret_midi, attachment_filename='return.mid',
-        mimetype='audio/midi', as_attachment=True)
+    output = tempfile.NamedTemporaryFile()
+    magenta.music.midi_io.sequence_proto_to_midi_file(generated_sequence, output.name)
+    output.seek(0)
+    return send_file(output, attachment_filename='generated.mid', mimetype='audio/midi', as_attachment=True)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -93,6 +113,4 @@ def index():
 
 
 if __name__ == '__main__':
-
-    models.initialize()
     app.run(host='127.0.0.1', port=8080)

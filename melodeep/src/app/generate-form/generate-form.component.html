@@ -1,0 +1,15 @@
+<mat-card width="80%">
+
+  <form [formGroup]="formGroup" novalidate (ngSubmit)="onSubmit()">
+
+
+      <input type="file" class="form-control-file" (change)="onFileChange($event)"/>
+
+
+    <button mat-button type="submit" [disabled]="formGroup.invalid || formGroup.prestine">Submit
+      <i class="fa fa-spinner fa-spin fa-fw" *ngIf="loading"></i>
+    </button>
+
+  </form>
+
+</mat-card>

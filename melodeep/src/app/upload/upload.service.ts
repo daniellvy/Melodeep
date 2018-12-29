@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpRequest, HttpEventType, HttpResponse } from '@angular/common/http';
-import {catchError, map} from 'rxjs/operators';
+import {HttpClient, HttpRequest, HttpEventType, HttpResponse, HttpHeaders} from '@angular/common/http';
+import {catchError, map, tap} from 'rxjs/operators';
 import { of } from 'rxjs/internal/observable/of';
 import {Observable} from 'rxjs';
 
@@ -11,11 +11,17 @@ export class UploadService {
   constructor(private http: HttpClient) {}
 
   generate(data) {
+    var HTTPOptions = {
+      headers: new HttpHeaders({
+        'Accept':'audio/midi'
+      }),
+      'responseType': 'audio/midi'
+    };
 
     if (data) {
-      return this.http.post('generate-melody', data)
+      return this.http.post('generate-melody', data, HTTPOptions)
         .pipe(
-          map(data => data),
+          tap(_ => console.log("Generated melody")),
           catchError(this.handleError('generate-melody', 'Generate melody failed'))
         );
     }

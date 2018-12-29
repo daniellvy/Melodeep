@@ -14,6 +14,7 @@ export class GenerateFormComponent implements OnInit {
     file: [null, Validators.required]
   });
   private file: any;
+  private generated_midi: any;
 
   constructor(private fb: FormBuilder, private cd: ChangeDetectorRef,
               private uploadService: UploadService) {}
@@ -34,7 +35,7 @@ export class GenerateFormComponent implements OnInit {
 
     this.loading = true;
     this.uploadService.generate(formData)
-      .subscribe(message => alert(message));
+      .subscribe(generated_midi => this.generated_midi = generated_midi);
   }
 
 }

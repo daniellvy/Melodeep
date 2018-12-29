@@ -11,6 +11,10 @@
       <i class="fa fa-spinner fa-spin fa-fw" *ngIf="loading"></i>
     </button>
 
+    <button mat-button [disabled]="generated_midi" onclick="onDownload($event)" >Download
+      <!--<button mat-button type="submit" [disabled]="formGroup.invalid || formGroup.prestine">Submit-->
+    </button>
+
   </form>
 
 </mat-card>

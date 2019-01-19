@@ -1,20 +1,67 @@
-<mat-card width="80%">
+<div class="container" fxLayout="row" fxLayoutAlign="center">
+  <form fxFlex="100%" fxLayoutAlign="center" [formGroup]="formGroup" novalidate (ngSubmit)="onSubmit()">
+    <div fxFlex="40%" class="container" fxLayout="column" fxLayoutGap="10px">
+      <mat-card align="left">
+        <button mat-button type="button" onclick="document.getElementById('fileToUpload').click()">
+          <label for="fileToUpload">Upload file</label>
+        </button>
+        <input id="fileToUpload" class="form-control-file" type="file" style="display:none;" (change)="onFileChange($event)">
+        <label>{{ this.filename }}</label>
+        <br/>
+        <button mat-button type="button" (click)="clearFile()">
+            Clear file
+          </button>
+        <br />
+        <br />
+        <mat-select placeholder="Predefined melody" [(value)]="melody">
+          <mat-option *ngFor="let melody of melodies" [value]="melody">
+            {{melody}}
+          </mat-option>
+        </mat-select>
+      </mat-card>
+      <mat-card align="left">
 
-  <form [formGroup]="formGroup" novalidate (ngSubmit)="onSubmit()">
+        <label>Select submodel</label>
+        <br />
+        <br />
+        <mat-select placeholder="Submodel" [(value)]="submodel">
+          <mat-option *ngFor="let submodel of submodels" [value]="submodel">
+            {{submodel.key}}
+          </mat-option>
+        </mat-select>
+      </mat-card>
+      <mat-card align="left">
+        <label matTooltip="The randomness of the generated melodies. 1.0 uses the unaltered softmax 
+        probabilities, greater than 1.0 makes melodies more random, less than 1.0 
+        makes melodies less random.">Temperature</label>
+        <br />
+        <mat-slider [(value)]="temperature" style="width: 100%" thumbLabel [displayWith]="formatLabel" tickInterval="1"
+          min="0" max="300" value="100">
+        </mat-slider>
+      </mat-card>
 
+      <mat-card align="left">
+        <label matTooltip="Number of steps for the generated melody, will be appended to the basic melody.">Steps</label>
+        <br />
+        <mat-slider [(value)]="steps" style="width: 100%" thumbLabel tickInterval="1" min="0" max="100" value="50">
+        </mat-slider>
+      </mat-card>
+      <mat-card>
+        <button mat-button [disabled]="submitting" type="submit">Submit
+          <i class="fa fa-spinner fa-spin fa-fw" *ngIf="submitting"></i>
+        </button>
+      </mat-card>
+      <mat-card>
+        <button mat-button type="button" [disabled]="submitting || generated_midi == null || this.toneService.playing" (click)="playMelody($event)">Play
+        </button>
+        <button mat-button type="button" [disabled]="submitting || !this.toneService.playing" (click)="stopMelody($event)">Stop
+        </button>
+        <button mat-button type="button" [disabled]="submitting || generated_midi == null" (click)="download($event)">Download
+        </button>
+      </mat-card>
 
-      <input type="file" class="form-control-file" (change)="onFileChange($event)"/>
-
-
-    <button mat-button type="submit" >Submit
-    <!--<button mat-button type="submit" [disabled]="formGroup.invalid || formGroup.prestine">Submit-->
-      <i class="fa fa-spinner fa-spin fa-fw" *ngIf="loading"></i>
-    </button>
-
-    <button mat-button [disabled]="generated_midi" onclick="onDownload($event)" >Download
-      <!--<button mat-button type="submit" [disabled]="formGroup.invalid || formGroup.prestine">Submit-->
-    </button>
-
+      <!--<app-visualization *ngIf="generated_midi" [blob]="generated_midi" [playing]="this.toneService.playing"></app-visualization>-->
+    </div>
   </form>
 
-</mat-card>
+</div>

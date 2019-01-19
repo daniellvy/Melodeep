@@ -11,32 +11,40 @@ import {
   MatIconModule,
   MatInputModule,
   MatListModule,
-  MatProgressBarModule
+  MatProgressBarModule, 
+  MatSliderModule,
+  MatSelectModule,
+  MatTooltipModule
 } from '@angular/material';
 import {HttpClientModule} from '@angular/common/http';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import { GenerateFormComponent } from './generate-form/generate-form.component';
 import {ReactiveFormsModule} from '@angular/forms';
+import { VisualizationComponent } from './visualization/visualization.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    GenerateFormComponent
+    GenerateFormComponent,
+    VisualizationComponent
   ],
   imports: [
     BrowserModule,
+    FlexLayoutModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     MatButtonModule,
     MatIconModule,
     MatListModule,
     MatCardModule,
-    FlexLayoutModule,
     HttpClientModule,
     MatProgressBarModule,
     ReactiveFormsModule,
     MatInputModule,
+    MatSliderModule,
     MatFormFieldModule,
+    MatSelectModule,
+    MatTooltipModule
   ],
   providers: [],
   bootstrap: [AppComponent],

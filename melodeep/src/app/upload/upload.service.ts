@@ -11,17 +11,12 @@ export class UploadService {
   constructor(private http: HttpClient) {}
 
   generate(data) {
-    var HTTPOptions = {
-      headers: new HttpHeaders({
-        'Accept':'audio/midi'
-      }),
-      'responseType': 'audio/midi'
-    };
-
     if (data) {
-      return this.http.post('generate-melody', data, HTTPOptions)
+      console.log("Generating melody...");
+
+      return this.http.post('generate-melody', data, {responseType: 'arraybuffer'})
         .pipe(
-          tap(_ => console.log("Generated melody")),
+          tap(_ => console.log('Generated melody')),
           catchError(this.handleError('generate-melody', 'Generate melody failed'))
         );
     }

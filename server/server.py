@@ -17,6 +17,7 @@ import base64
 import codecs
 import tempfile
 import uuid
+from shutil import copyfile
 
 import magenta.music as mm
 import magenta
@@ -82,25 +83,38 @@ twinkle_twinkle.tempos.add(qpm=60);
 @app.route('/generate-melody', methods=['POST'])
 def generate():
     now = time.time()
-
-    midifile = request.files['file']
-    if not (midifile.filename.endswith(".mid") or midifile.filename.endswith(".midi")):
-        response = jsonify({"message": "Bad file format, please upload mid / midi"})
-        response.status_code = 500
-        return response
+    print(request.form)
 
     filename = "uploaded/" + str(uuid.uuid4()) + ".mid"
-    midifile.save(filename)
+    if 'file' in request.files:
+        midifile = request.files['file']
+        if not (midifile.filename.endswith(".mid") or midifile.filename.endswith(".midi")):
+            response = jsonify({"message": "Bad file format, please upload mid / midi"})
+            response.status_code = 500
+            return response
+        midifile.save(filename)
+    else:
+        predefined_melody = request.form["melody"]
+        found = False
+        for predefined_file in os.listdir('predefined'):
+            if predefined_file.lower().startswith(predefined_melody.lower()):
+                copyfile('predefined/' + predefined_file, filename)
+                found = True
+        if not found:
+            response = jsonify({"message": "File wasn't found"})
+            response.status_code = 500
+            return response
 
     midi_data = pretty_midi.PrettyMIDI(filename)
     primer_sequence = magenta.music.midi_io.midi_to_sequence_proto(midi_data)
-    num_steps = 20  # change this for shorter or longer sequences
-    temperature = 1.0  # the higher the temperature the more random the sequence.
-    submodel = "basic_rnn"
+
+    values = request.form
+    num_steps = 100  # change this for shorter or longer sequences
+    temperature = float(values["temperature"])  # the higher the temperature the more random the sequence.
+    submodel = values["submodel"]
+    print("Generating melody, steps=%d, temperature=%f, submodel=%s" % (num_steps, temperature, submodel))
 
     generated_sequence = models.generate(midi_data, primer_sequence, num_steps, temperature, submodel)
-    print(generated_sequence)
-
     output = tempfile.NamedTemporaryFile()
     magenta.music.midi_io.sequence_proto_to_midi_file(generated_sequence, output.name)
     output.seek(0)

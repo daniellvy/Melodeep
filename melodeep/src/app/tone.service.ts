@@ -1,22 +1,24 @@
-import {Injectable, OnInit} from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { Subject } from "rxjs/index";
 
 export enum Command {
   Play = 1,
   Stop,
   MidiChange,
+  Note
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class ToneService{
+export class ToneService {
   public playing = false;
+  public note;
   private midiPart: any;
 
   private toneSource = new Subject<Command>();
   toneSourceListener = this.toneSource.asObservable();
-  
+
   constructor() {
   }
 
@@ -24,6 +26,7 @@ export class ToneService{
     if (this.midiPart) {
       console.log('Cleared midi');
       this.midiPart.stop();
+      this.note = undefined;
       Tone.Transport.stop();
       this.midiPart = null;
       this.toneSource.next(Command.MidiChange);
@@ -42,13 +45,14 @@ export class ToneService{
     // make sure you set the tempo before you schedule the events
     Tone.Transport.bpm.value = midi.header.bpm;
 
-
+    var toneSource = this.toneSource;
+    
     // pass in the note events from one of the tracks as the second argument to Tone.Part
-    this.midiPart = new Tone.Part(function(time, note) {
+    this.midiPart = new Tone.Part(function (time, note) {
 
       // use the events to play the synth
       synth.triggerAttackRelease(note.name, note.duration, time, note.velocity);
-
+      toneSource.next(note);
     }, midi.tracks[1].notes).start();
 
     this.playing = true;
@@ -60,6 +64,7 @@ export class ToneService{
     if (this.midiPart) {
       console.log('Stopped playing...');
       this.midiPart.stop();
+      this.note = undefined;
       this.playing = false;
       this.toneSource.next(Command.Stop);
     }

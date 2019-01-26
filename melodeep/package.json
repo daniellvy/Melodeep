@@ -31,6 +31,7 @@
     "hammerjs": "^2.0.8",
     "midi-file-parser": "^1.0.0",
     "midiconvert": "^0.4.7",
+    "p5": "^0.7.2",
     "pixi.js": "^4.8.5",
     "rxjs": "~6.3.3",
     "tone": "^0.12.80",

@@ -51,7 +51,7 @@ export class GenerateFormComponent implements OnInit {
   }
 
   clearFile() {
-    document.getElementById('fileToUpload').value = '';
+    (<HTMLInputElement>document.getElementById('fileToUpload')).value = '';
     this.filename = undefined;
     this.file = undefined;
 

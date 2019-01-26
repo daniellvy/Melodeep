@@ -1,6 +1,7 @@
-<div class="container" fxLayout="row" fxLayoutAlign="center">
-  <form fxFlex="100%" fxLayoutAlign="center" [formGroup]="formGroup" novalidate (ngSubmit)="onSubmit()">
-    <div fxFlex="40%" class="container" fxLayout="column" fxLayoutGap="10px">
+<div class="container" fxLayout="row" fxLayoutAlign="left" fxLayoutGap="10px">
+  <form fxFlex="50%" fxLayoutAlign="center" [formGroup]="formGroup" novalidate (ngSubmit)="onSubmit()" fxLayoutGap="20px">
+
+    <div fxFlex="100%" class="container" fxLayout="column" fxLayoutGap="10px">
       <mat-card align="left">
         <button mat-button type="button" onclick="document.getElementById('fileToUpload').click()">
           <label for="fileToUpload">Upload file</label>
@@ -60,8 +61,13 @@
         </button>
       </mat-card>
 
-      <!--<app-visualization *ngIf="generated_midi" [blob]="generated_midi" [playing]="this.toneService.playing"></app-visualization>-->
     </div>
+
   </form>
 
+  <div fxFlex="50%">
+      <mat-card>
+        <app-visualization id="app-visualization" fxFlex></app-visualization>
+      </mat-card>
+  </div>
 </div>

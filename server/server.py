@@ -68,18 +68,6 @@ twinkle_twinkle.total_time = 8
 
 twinkle_twinkle.tempos.add(qpm=60);
 
-#
-# @app.route('/predict', methods=['POST'])
-# def predict():
-#     now = time.time()
-#     values = json.loads(request.data)
-#     midi_data = pretty_midi.PrettyMIDI(StringIO(''.join(chr(v) for v in values)))
-#     duration = float(request.args.get('duration'))
-#     ret_midi = generate_midi(midi_data, duration)
-#     return send_file(ret_midi, attachment_filename='return.mid',
-#         mimetype='audio/midi', as_attachment=True)
-
-
 @app.route('/generate-melody', methods=['POST'])
 def generate():
     now = time.time()

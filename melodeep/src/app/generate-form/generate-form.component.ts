@@ -27,7 +27,12 @@ export class GenerateFormComponent implements OnInit {
   private submitting = false;
 
   melodies: string[] = [
-    "Californication"
+    "Californication",
+    "Bohemian Rhapsody",
+    "Hey You",
+    "Ziggy Stardust",
+    "Still Dre",
+    "Sweet Child O Mine",
   ];
 
   submodels: any[] = [

@@ -11,7 +11,7 @@ import {
   MatIconModule,
   MatInputModule,
   MatListModule,
-  MatProgressBarModule, 
+  MatProgressBarModule,
   MatSliderModule,
   MatSelectModule,
   MatTooltipModule

@@ -1,1 +1,4 @@
 .idea/
+.DS_Store
+server/.DS_Store
+server/predefined/.DS_Store

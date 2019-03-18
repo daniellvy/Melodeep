@@ -3,6 +3,9 @@
 
     <div fxFlex="100%" class="container" fxLayout="column" fxLayoutGap="10px">
       <mat-card align="left">
+        <label>Upload a midi file or select from predefined list</label>
+        <br/>
+        <br/>
         <button mat-button type="button" onclick="document.getElementById('fileToUpload').click()">
           <label for="fileToUpload">Upload file</label>
         </button>
@@ -22,18 +25,19 @@
       </mat-card>
       <mat-card align="left">
 
-        <label>Select submodel</label>
+        <label matTooltip="Set memory model, Basic RNN is a simple LSTM, Lookback RNN aggregates inputs across two previous tabs, Attention RNN takes into account the entire previous melody.">Select submodel</label>
         <br />
         <br />
-        <mat-select placeholder="Submodel" [(value)]="submodel">
+        <mat-select
+          placeholder="Submodel" [(value)]="submodel">
           <mat-option *ngFor="let submodel of submodels" [value]="submodel">
             {{submodel.key}}
           </mat-option>
         </mat-select>
       </mat-card>
       <mat-card align="left">
-        <label matTooltip="The randomness of the generated melodies. 1.0 uses the unaltered softmax 
-        probabilities, greater than 1.0 makes melodies more random, less than 1.0 
+        <label matTooltip="The randomness of the generated melodies. 1.0 uses the unaltered softmax
+        probabilities, greater than 1.0 makes melodies more random, less than 1.0
         makes melodies less random.">Temperature</label>
         <br />
         <mat-slider [(value)]="temperature" style="width: 100%" thumbLabel [displayWith]="formatLabel" tickInterval="1"

@@ -41,7 +41,7 @@ import json
 
 from flask import Flask
 
-app = Flask(__name__, static_url_path='', static_folder=os.path.abspath('../melodeep/dist/'))
+app = Flask(__name__, static_url_path='', static_folder=os.path.abspath('../melodeep/dist/melodeep'))
 
 ALLOWED_EXTENSIONS = set(['mid', 'midi'])
 UPLOAD_FOLDER = 'uploaded'
@@ -111,7 +111,7 @@ def generate():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return send_file('melodeep/index.html')
+    return send_file('../melodeep/dist/melodeep/index.html')
 
 
 if __name__ == '__main__':
